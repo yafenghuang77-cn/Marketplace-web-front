@@ -1,3 +1,4 @@
+import { getToken } from '@/utils/token';
 import { request } from '@umijs/max';
 
 /** 登录 POST /api/auth/login */
@@ -40,8 +41,14 @@ export async function logout(options?: { [key: string]: any }) {
 
 /** 获取当前用户信息 GET /api/auth/currentUser */
 export async function getCurrentUser(options?: { [key: string]: any }) {
+  const token = getToken();
+  console.log('getCurrentUser - token:', token);
+
   return request<API.Result_UserInfo_>('/api/auth/currentUser', {
     method: 'GET',
+    headers: {
+      Authorization: token ? `Bearer ${token}` : '',
+    },
     ...(options || {}),
   });
 }

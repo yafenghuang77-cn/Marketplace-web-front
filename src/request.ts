@@ -7,12 +7,17 @@ const requestInterceptors: RequestConfig['requestInterceptors'] = [
   (config: any) => {
     // 从 token 管理工具获取 token（自动检查过期）
     const token = getToken();
+    console.log('请求拦截器 - token:', token);
+    console.log('请求拦截器 - 请求URL:', config.url);
+
     if (token) {
-      config.headers = {
-        ...config.headers,
-        Authorization: `Bearer ${token}`,
-      };
+      // 确保 headers 对象存在
+      if (!config.headers) {
+        config.headers = {};
+      }
+      config.headers['Authorization'] = `Bearer ${token}`;
     }
+    console.log('请求拦截器 - 最终headers:', config.headers);
     return config;
   },
 ];
@@ -20,7 +25,9 @@ const requestInterceptors: RequestConfig['requestInterceptors'] = [
 // 响应拦截器
 const responseInterceptors: RequestConfig['responseInterceptors'] = [
   (response: any) => {
-    return response;
+    console.log(response.data, 'response.data');
+
+    return response.data;
   },
 ];
 

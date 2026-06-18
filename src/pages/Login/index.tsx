@@ -18,7 +18,12 @@ const Login: React.FC = () => {
       const result = await login(values);
       if (result.code === 200 && result.data) {
         // 保存 token（3天有效期）
-        setToken(result.data.token || '');
+        const token = result.data.token;
+        if (!token) {
+          message.error('登录失败：未获取到token');
+          return;
+        }
+        setToken(token);
         message.success('登录成功！');
         // 更新初始状态
         await setInitialState((s: any) => ({

@@ -1,5 +1,5 @@
 import { isTokenValid, removeToken } from '@/utils/token';
-import { history, useLocation } from '@umijs/max';
+import { history } from '@umijs/max';
 import { message } from 'antd';
 import React, { useEffect } from 'react';
 
@@ -15,11 +15,10 @@ interface AuthGuardProps {
  * 用于检查 token 有效性，过期则跳转到登录页
  */
 const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
-  const location = useLocation();
-
   useEffect(() => {
     // 白名单路径不检查
-    if (whiteList.includes(location.pathname)) {
+    const currentPath = history.location.pathname;
+    if (whiteList.includes(currentPath)) {
       return;
     }
 
@@ -32,7 +31,8 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
 
     // 定期检查 token（每分钟）
     const timer = setInterval(() => {
-      if (!isTokenValid() && !whiteList.includes(location.pathname)) {
+      const path = history.location.pathname;
+      if (!isTokenValid() && !whiteList.includes(path)) {
         removeToken();
         message.error('登录已过期，请重新登录');
         history.push('/login');
@@ -43,7 +43,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     return () => {
       clearInterval(timer);
     };
-  }, [location.pathname]);
+  }, []);
 
   return <>{children}</>;
 };

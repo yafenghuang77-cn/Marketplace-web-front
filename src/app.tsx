@@ -18,14 +18,21 @@ export async function getInitialState(): Promise<{
 }> {
   const { location } = history;
 
+  console.log('getInitialState - 当前路径:', location.pathname);
+
   // 如果在白名单中，不需要检查登录状态
   if (whiteList.includes(location.pathname)) {
+    console.log('getInitialState - 白名单路径，跳过检查');
     return { name: 'Marketplace' };
   }
 
   // 检查 token 是否有效（存在且未过期）
-  if (!isTokenValid()) {
+  const tokenValid = isTokenValid();
+  console.log('getInitialState - token有效:', tokenValid);
+
+  if (!tokenValid) {
     // token 无效或已过期，跳转到登录页
+    console.log('getInitialState - token无效，跳转登录页');
     message.error('登录已过期，请重新登录');
     history.push('/login');
     return { name: 'Marketplace' };
@@ -33,7 +40,10 @@ export async function getInitialState(): Promise<{
 
   try {
     // token 有效，尝试获取用户信息
+    console.log('getInitialState - 开始获取用户信息');
     const result = await getCurrentUser();
+    console.log('getInitialState - 用户信息结果:', result);
+
     if (result.code === 200 && result.data) {
       return {
         currentUser: result.data,
@@ -41,13 +51,15 @@ export async function getInitialState(): Promise<{
       };
     } else {
       // 用户信息获取失败，清除 token 并跳转到登录页
+      console.log('getInitialState - 用户信息获取失败，code:', result.code);
       removeToken();
       message.error('登录已过期，请重新登录');
       history.push('/login');
       return { name: 'Marketplace' };
     }
-  } catch (error) {
+  } catch (error: any) {
     // 请求失败，清除 token 并跳转到登录页
+    console.error('getInitialState - 请求异常:', error);
     removeToken();
     message.error('登录已过期，请重新登录');
     history.push('/login');
